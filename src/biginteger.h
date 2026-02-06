@@ -11,6 +11,8 @@ class BigInteger {
         static constexpr uint32_t BASE = 1'000'000'000; //База дробления числа в векторе для ускорения операций (каждый блок < BASE)
         bool is_negative = false;
         std::vector<uint32_t> digits;
+        void normalize();  // убрать ведущие нули
+        //static int absCompare(const BigInteger& a, const BigInteger& b);
 
     public:
         BigInteger();
@@ -54,7 +56,4 @@ class BigInteger {
         // Ввод / вывод
         friend std::ostream& operator<<(std::ostream& os, const BigInteger& value);
         friend std::istream& operator>>(std::istream& is, BigInteger& value);
-
-        // Строковое представление
-        std::string ToString() const;
 };
