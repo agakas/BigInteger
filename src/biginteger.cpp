@@ -85,9 +85,139 @@ void BigInteger::normalize() {
 }
 
 //Реализация перегрузки арифметических операторов
-/*BigInteger::BigInteger& operator+=(const BigInteger& other){
-    
-}*/
+//Сложение и вычитание
+BigInteger& BigInteger::operator+=(const BigInteger& other){
+    // Одинаковые знаки - просто складываем по модулю
+    if (is_negative == other.is_negative) {
+        addAbs(other);
+    } else {
+        // Разные знаки - вычитаем меньшее из большего по модулю
+        if (absCompare(*this, other) >= 0) {
+            subAbs(other);
+        } else {
+            BigInteger temp = other;
+            temp.subAbs(*this);
+            *this = std::move(temp);
+        }
+    }
+    return *this;
+}
+
+BigInteger& BigInteger::operator-=(const BigInteger& other) {
+    return *this += (-other);
+}
+
+BigInteger operator+(BigInteger lhs, const BigInteger& rhs) {
+    lhs += rhs;
+    return lhs;
+}
+
+BigInteger operator-(BigInteger lhs, const BigInteger& rhs) {
+    lhs -= rhs;
+    return lhs;
+}
+
+// Умножение и деление
+BigInteger& BigInteger::operator*=(const BigInteger& other) {
+    // если одно из чисел = 0
+    if ((digits.size() == 1 && digits[0] == 0) ||
+        (other.digits.size() == 1 && other.digits[0] == 0)) {
+        digits = {0};
+        is_negative = false;
+        return *this;
+    }
+
+    std::vector<uint64_t> tmp(digits.size() + other.digits.size(), 0);
+
+    for (size_t i = 0; i < digits.size(); ++i) {
+        for (size_t j = 0; j < other.digits.size(); ++j) {
+            tmp[i + j] += static_cast<uint64_t>(digits[i]) * other.digits[j];
+        }
+    }
+
+    digits.resize(tmp.size());
+    uint64_t carry = 0;
+
+    for (size_t i = 0; i < tmp.size(); ++i) {
+        tmp[i] += carry;
+        digits[i] = static_cast<uint32_t>(tmp[i] % BASE);
+        carry = tmp[i] / BASE;
+    }
+
+    is_negative = (is_negative != other.is_negative);
+    normalize();
+    return *this;
+}
+
+BigInteger& BigInteger::operator/=(const BigInteger& other) {
+    if (other.digits.size() == 1 && other.digits[0] == 0)
+        throw std::runtime_error("Division by zero");
+
+    BigInteger divisor = other;
+    divisor.is_negative = false;
+
+    BigInteger current;
+    current.digits = {0};
+
+    BigInteger result;
+    result.digits.resize(digits.size(), 0);
+
+    for (int i = static_cast<int>(digits.size()) - 1; i >= 0; --i) {
+        current.digits.insert(current.digits.begin(), digits[i]);
+        current.normalize();
+
+        uint32_t left = 0, right = BASE - 1, best = 0;
+        while (left <= right) {
+            uint32_t mid = (left + right) / 2;
+            BigInteger tmp = divisor;
+            tmp.mulByUint(mid);
+
+            if (absCompare(tmp, current) <= 0) {
+                best = mid;
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+
+        result.digits[i] = best;
+        BigInteger tmp = divisor;
+        tmp.mulByUint(best);
+        current -= tmp;
+    }
+
+    *this = result;
+    is_negative = (is_negative != other.is_negative);
+    normalize();
+    return *this;
+}
+
+BigInteger operator*(BigInteger lhs, const BigInteger& rhs) {
+    lhs *= rhs;
+    return lhs;
+}
+
+BigInteger operator/(BigInteger lhs, const BigInteger& rhs) {
+    lhs /= rhs;
+    return lhs;
+}
+
+BigInteger operator%(BigInteger lhs, const BigInteger& rhs) {
+    lhs %= rhs;
+    return lhs;
+}
+
+// Чисто унарники
+BigInteger BigInteger::operator-() const {
+    BigInteger res = *this;
+    if (!(digits.size() == 1 && digits[0] == 0))
+        res.is_negative = !is_negative;
+    return res;
+}
+
+BigInteger BigInteger::operator+() const {
+    return *this;
+}
 
 // Вспомогашки для арифметики
 // Сравнени по модулю
@@ -139,6 +269,16 @@ void BigInteger::subAbs(const BigInteger& other) {
     }
 
     normalize();
+}
+// Облегченное умножение на uint32_t для оптимизации деления
+void BigInteger::mulByUint(uint32_t m) {
+    uint64_t carry = 0;
+    for (size_t i = 0; i < digits.size(); ++i) {
+        uint64_t cur = carry + static_cast<uint64_t>(digits[i]) * m;
+        digits[i] = static_cast<uint32_t>(cur % BASE);
+        carry = cur / BASE;
+    }
+    if (carry) digits.push_back(static_cast<uint32_t>(carry));
 }
 
 // Строковое представление
