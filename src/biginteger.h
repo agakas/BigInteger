@@ -11,8 +11,11 @@ class BigInteger {
         static constexpr uint32_t BASE = 1'000'000'000; //База дробления числа в векторе для ускорения операций (каждый блок < BASE)
         bool is_negative = false;
         std::vector<uint32_t> digits;
+
         void normalize();  // убрать ведущие нули
-        //static int absCompare(const BigInteger& a, const BigInteger& b);
+        static int absCompare(const BigInteger& a, const BigInteger& b);  //сравнение модулей
+        void addAbs(const BigInteger& other); //сложение по модулю
+        void subAbs(const BigInteger& other); //вычитание по модулю (предполагается, что *this >= other по модулю)
 
     public:
         BigInteger();
