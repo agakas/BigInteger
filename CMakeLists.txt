@@ -8,6 +8,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 add_executable(biginteger
     src/main.cpp
     src/biginteger.cpp
+    src/biginteger_literals.cpp
 )
 
 target_include_directories(biginteger PRIVATE include)
