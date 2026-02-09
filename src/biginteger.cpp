@@ -288,35 +288,27 @@ void BigInteger::mulByUint(uint32_t m) {
 }
 
 //Сравнение
-bool BigInteger::operator==(const BigInteger& other) const {
-    return is_negative == other.is_negative &&
-           digits == other.digits;
-}
-
-std::strong_ordering operator<=>(const BigInteger& rhs) const{
-    if (is_negative != other.is_negative) {
+std::strong_ordering BigInteger::operator<=>(const BigInteger& rhs) const {
+    if (is_negative != rhs.is_negative)
         return is_negative
             ? std::strong_ordering::less
             : std::strong_ordering::greater;
-    }
-    int cmp = absCompare(*this, other);
 
-    if (cmp == 0)
-        return std::strong_ordering::equal;
+    int cmp = absCompare(*this, rhs);
+    if (cmp == 0) return std::strong_ordering::equal;
 
-    if (!is_negative) {
+    if (!is_negative)
         return cmp < 0
             ? std::strong_ordering::less
             : std::strong_ordering::greater;
-    } else {
+    else
         return cmp < 0
             ? std::strong_ordering::greater
             : std::strong_ordering::less;
-    }
 }
 
 // Преобразование к bool
-bool BigInteger::operator bool() const {
+BigInteger::operator bool() const {
     for (uint32_t d : digits) {
         if (d != 0) return true;
     }
