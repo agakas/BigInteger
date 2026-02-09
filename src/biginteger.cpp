@@ -315,6 +315,14 @@ std::strong_ordering operator<=>(const BigInteger& rhs) const{
     }
 }
 
+// Преобразование к bool
+bool BigInteger::operator bool() const {
+    for (uint32_t d : digits) {
+        if (d != 0) return true;
+    }
+    return false;
+}
+
 // Строковое представление
 std::string BigInteger::ToString() const {
     if (digits.empty()) return "0";
