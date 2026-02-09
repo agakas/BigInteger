@@ -225,6 +225,33 @@ BigInteger BigInteger::operator+() const {
     return *this;
 }
 
+BigInteger& BigInteger::operator++()          // prefix
+{
+    *this += BigInteger(1LL);   // добавляем 1
+    return *this;
+}
+
+BigInteger BigInteger::operator++(int)        // postfix
+{
+    BigInteger tmp = *this;   // сохраняем старое значение
+    ++(*this);                // переиспользуем prefix‑оператор
+    return tmp;
+}
+
+BigInteger& BigInteger::operator--()          // prefix
+{
+    *this -= BigInteger(1LL);   // вычитаем 1
+    return *this;
+}
+
+BigInteger BigInteger::operator--(int)        // postfix
+{
+    BigInteger tmp = *this;   // сохраняем старое значение
+    --(*this);                // переиспользуем prefix‑оператор
+    return tmp;
+}
+
+
 // Вспомогашки для арифметики
 // Сравнени по модулю
 int BigInteger::absCompare(const BigInteger& a, const BigInteger& b) {
