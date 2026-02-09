@@ -16,7 +16,7 @@ class BigInteger {
         static int absCompare(const BigInteger& a, const BigInteger& b);  //сравнение модулей
         void addAbs(const BigInteger& other); //сложение по модулю
         void subAbs(const BigInteger& other); //вычитание по модулю (предполагается, что *this >= other по модулю)
-        void BigInteger::mulByUint(uint32_t m) //Облегченное умножение на uint32_t для оптимизации деления
+        void mulByUint(uint32_t m); //Облегченное умножение на uint32_t для оптимизации деления
 
     public:
         BigInteger();

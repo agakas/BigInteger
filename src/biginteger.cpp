@@ -1,5 +1,5 @@
 #include "biginteger.h"
-#include <ostream>
+#include <iostream>
 #include <string>
 
 //Конструкторы
@@ -192,6 +192,12 @@ BigInteger& BigInteger::operator/=(const BigInteger& other) {
     return *this;
 }
 
+BigInteger& BigInteger::operator%=(const BigInteger& other) {
+    BigInteger q = *this / other;
+    *this -= q * other;
+    return *this;
+}
+
 BigInteger operator*(BigInteger lhs, const BigInteger& rhs) {
     lhs *= rhs;
     return lhs;
@@ -279,6 +285,34 @@ void BigInteger::mulByUint(uint32_t m) {
         carry = cur / BASE;
     }
     if (carry) digits.push_back(static_cast<uint32_t>(carry));
+}
+
+//Сравнение
+bool BigInteger::operator==(const BigInteger& other) const {
+    return is_negative == other.is_negative &&
+           digits == other.digits;
+}
+
+std::strong_ordering operator<=>(const BigInteger& rhs) const{
+    if (is_negative != other.is_negative) {
+        return is_negative
+            ? std::strong_ordering::less
+            : std::strong_ordering::greater;
+    }
+    int cmp = absCompare(*this, other);
+
+    if (cmp == 0)
+        return std::strong_ordering::equal;
+
+    if (!is_negative) {
+        return cmp < 0
+            ? std::strong_ordering::less
+            : std::strong_ordering::greater;
+    } else {
+        return cmp < 0
+            ? std::strong_ordering::greater
+            : std::strong_ordering::less;
+    }
 }
 
 // Строковое представление
